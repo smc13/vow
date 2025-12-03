@@ -19,10 +19,6 @@ func Parse(ctx context.Context, schema Schema, input any, out any) error {
 		return NewParseErr(dv.Issues(), err)
 	}
 
-	if dv.HasIssues() {
-		return NewParseErr(dv.Issues(), nil)
-	}
-
 	outputVal := reflect.New(targetType).Elem()
 	if dv.value.Type().AssignableTo(targetType) {
 		outputVal.Set(dv.value)
@@ -34,6 +30,12 @@ func Parse(ctx context.Context, schema Schema, input any, out any) error {
 
 	outputVal.Set(dv.value.Convert(targetType))
 	rv.Elem().Set(outputVal)
+
+	// doing this check last so we can return a partially fill output
+	if dv.HasIssues() {
+		return NewParseErr(dv.Issues(), nil)
+	}
+
 	return nil
 }
 

@@ -34,3 +34,14 @@ func (e *ParseErr) HasIssueWithKey(key string) bool {
 
 	return false
 }
+
+func (e *ParseErr) GetIssuesForKey(key string) []Issue {
+	var issues []Issue
+	for _, issue := range e.Issues {
+		if issue.Key.String() == key {
+			issues = append(issues, issue)
+		}
+	}
+
+	return issues
+}

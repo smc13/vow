@@ -46,7 +46,7 @@ func (s *ParseSuite) TestParse_AdvancedSuccess() {
 		"last_name":  String(),
 		"Admin":      Bool(),
 		"config": Struct[userConfig](Fields{
-			"email": String(),
+			"email": Pipe(String(), Email()),
 		}),
 	})
 
@@ -76,7 +76,7 @@ func (s *ParseSuite) TestParse_AdvancedFailure() {
 		"last_name":  String(),
 		"Admin":      Bool(),
 		"config": Struct[userConfig](Fields{
-			"email": String(),
+			"email": Pipe(String(), Email()),
 		}),
 	})
 
@@ -85,7 +85,7 @@ func (s *ParseSuite) TestParse_AdvancedFailure() {
 		"last_name":  123,   // invalid type
 		"Admin":      "yes", // invalid type
 		"config": map[string]any{
-			"email": 456, // invalid type
+			"email": "not an email address", // correct type but invalid format
 		},
 	}
 
@@ -93,8 +93,8 @@ func (s *ParseSuite) TestParse_AdvancedFailure() {
 	err := Parse(s.T().Context(), schema, input, &result)
 	expectErr := &ParseErr{}
 	s.Require().ErrorAs(err, &expectErr)
-	s.Require().Len(expectErr.Issues, 3)
 
+	s.Len(expectErr.Issues, 3)
 	s.True(expectErr.HasIssueWithKey("last_name"))
 	s.True(expectErr.HasIssueWithKey("Admin"))
 	s.True(expectErr.HasIssueWithKey("config.email"))
